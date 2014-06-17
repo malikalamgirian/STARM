@@ -1,0 +1,311 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+    <h:head>
+        <title>Simple Yearly Frequencies</title>
+         <style>
+            
+            
+            .highcharts-tooltip>table, tr, th, td {
+                padding: 5px;  
+                border: 1px black solid;
+                border-collapse:collapse;
+                background: rgba(255,255,255,0.85);
+            }
+
+            #transactionDetails{                
+                font-family: wf_segoe-ui_normal, Segoe UI, Segoe, Segoe WP, Tahoma, Verdana, Arial, sans-serif;              
+                
+            }
+        </style>
+        
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+        <script src="http://code.highcharts.com/highcharts.js"></script>
+        
+        <script>
+            var options = {
+                chart: {
+                    renderTo: 'container',
+                    zoomType: 'xy',
+                    type: 'column'
+                },
+                title: {
+                    text: 'Temporal Analysis'
+                },
+                subtitle: {
+                    // load dynamically
+                    text: ''
+                },
+                xAxis: {
+                    tickInterval: 1,
+                    title: {
+                        text: 'Year'
+                    }
+                },
+                yAxis: {
+                    allowDecimals: false,
+                    floor: 0,
+                    title: {
+                        text: 'Frequency'
+                    }
+                },
+                tooltip: {
+                    borderWidth: 1,
+                    shadow: true,
+                    useHTML: true,
+                    ////<![CDATA[
+                    headerFormat: '<span style=\'font-size:25px; \'><b>{point.y}</b></span> time(s) in<br>',
+                    pointFormat: 'year <span style=\'font-size:12px; \'><b>{point.x}</b></span>',
+                    //]]>
+                    style: {
+                        padding: 4
+                    }
+                },
+                credits: {
+                    enabled: true,
+                    text: 'STARM'
+                },
+                plotOptions: {
+                    series: {
+                        cursor: 'pointer',
+                        events: {
+                            click: function(event) {
+                                $('#transactionDetails').html(getTransactionsDetails(event.point.x));                                
+                            }
+                        }
+                    }
+                },
+                // load series data dynamically
+                series: []
+            };
+
+            var simpleYealyFrequenciesDataFileURL = 'https://dl.dropboxusercontent.com/s/mjcz7gszk96nzvb/simpleYealyFrequenciesDataFile.txt?dl=1';
+
+            // read frequencies data file
+            $.get(simpleYealyFrequenciesDataFileURL, function(data) {
+                // split the lines
+                var lines = data.split("\n");
+
+                // set chart sub-title option from the first line of file
+                //$('#transactionDetails').html(lines[0]);
+
+                options.subtitle.text = 'Rule: ' + lines.shift();
+
+                // create temporary series for data managing
+                var tempSeries = {
+                    data: []
+                };
+
+                $.each(lines, function(lineNo, line) {
+                    //$('#transactionDetails').html( $('#transactionDetails').html() + "<br/>" + line);
+
+                    var items = line.split(",");
+
+                    var year = parseInt(items[0]);
+                    var frequency = parseInt(items[1]);
+
+                    var seriesItem = [year, frequency];
+
+                    tempSeries.data.push(seriesItem);
+                });
+
+                tempSeries.name = 'Yearly frequency';
+                options.series.push(tempSeries);
+
+                // create the chart
+                var chart = new Highcharts.Chart(options);
+            });
+
+
+
+            // prepare transactionDetails for each year
+            function SpatioTemporalTransaction(id, timeStamp, location, post, topic) {
+                this.id = id;
+                this.timeStamp = timeStamp;
+                this.location = location;
+                this.post = post;
+                this.topic = topic;
+
+                /*$('#transactionDetails').html($('#transactionDetails').html() + "<br/>" + id + "<br/>"
+                        + timeStamp + "<br/>"
+                        + location + "<br/>"
+                        + post + "<br/>"
+                        + topic + "<br/>"
+                        );*/
+            }
+
+            // create transactions groups to hold transactionsGroup for each year
+            var transactionsGroups = [];
+
+            // create a transactionsGroup
+            /*var transactionsGroup = {
+             year: null,
+             transactions: []
+             };*/
+
+            function transactionsGroup(year, stTransaction) {
+                //$('#transactionDetails').html($('#transactionDetails').html() + "<br />\In constructor new transaction group for year : " + year + " , TID : " + stTransaction.id);
+
+                var transactionsForGroup = [];
+                transactionsForGroup.push(stTransaction);
+
+                this.year = year;
+                this.transactions = transactionsForGroup;
+
+                //$('#transactionDetails').html($('#transactionDetails').html() + "<br />\Exiting constructor new transaction group for year : " + this.year + " , this.transactions.length : " + this.transactions.length);
+            }
+
+            function findTransactionGroup(year, transactionsGroups) {
+                //$('#transactionDetails').html($('#transactionDetails').html() + "<br /><br />Finding transactionsGroup for year : " + year);
+
+                var transactionGroupToReturn = null;
+
+                $.each(transactionsGroups, function(number, transactionGroup) {
+                    if (transactionGroup.year === year) {
+                        //$('#transactionDetails').html($('#transactionDetails').html() + "<br />Found transactionsGroup for year : " + year);
+                        transactionGroupToReturn = transactionGroup;
+                    } else {
+                        //$('#transactionDetails').html($('#transactionDetails').html() + "<br />transactionGroup.year !== year : " + transactionGroup.year + " !== " + year);
+                    }
+                });
+
+                if (transactionGroupToReturn === null) {
+                    //$('#transactionDetails').html($('#transactionDetails').html() + "<br />Could not find transactionsGroup for year : " + year);
+                }
+
+                return transactionGroupToReturn;
+            }
+            ;
+
+            function getYearFromTimeStamp(timeStamp) {
+                return parseInt(timeStamp.substring(timeStamp.length - 4, timeStamp.length));
+            }
+
+            // create empty dataset, and fill it dynamically
+            var stTransactions = [];
+
+            var temporalDataFileURL = 'https://dl.dropboxusercontent.com/s/huslqhb72vt3icg/temporalDataFile.txt?dl=1';
+
+            // read temporal data file into stTransactions
+            $.get(temporalDataFileURL, function(data) {
+                // split the lines
+                var lines = data.split("\n");
+
+                // skip first line
+                lines.shift();
+
+                $.each(lines, function(lineNo, line) {
+                    var items = line.split("\t");
+
+                    var stTransaction = new SpatioTemporalTransaction(parseInt(items[0]), items[1], items[2], items[3], items[4]);
+
+                    stTransactions.push(stTransaction);
+                });
+
+                //$('#transactionDetails').html($('#transactionDetails').html() + "<br />Total number of transactions : " + stTransactions.length);
+
+                // populate transactions groups using stTransactions
+                $.each(stTransactions, function(number, stTransaction) {
+                    //<![CDATA[
+                    if (number === 0) {
+                        //$('#transactionDetails').html($('#transactionDetails').html() + "<br /><br /><br />Processing TNumber : " + number + " , TID : " + stTransaction.id);
+
+                        // when no transaction group exists
+                        //$('#transactionDetails').html($('#transactionDetails').html() + "<br />\Creating new transaction group for year : " + getYearFromTimeStamp(stTransaction.timeStamp) + " , TID : " + stTransaction.id);
+
+                        var tGroup = new transactionsGroup(getYearFromTimeStamp(stTransaction.timeStamp), stTransaction);
+                        //tGroup.year = getYearFromTimeStamp(stTransaction.timeStamp);
+                        //tGroup.transactions.push(stTransaction);
+
+                        //$('#transactionDetails').html($('#transactionDetails').html() + "<br />\Created new transaction group for year : " + tGroup.year + " , tGroup.transactions.length : " + tGroup.transactions.length);
+
+                        //$('#transactionDetails').html($('#transactionDetails').html() + "<br />Pushing tGroup.year : " + tGroup.year + ", transactionsGroups.length : " + transactionsGroups.length);
+
+                        transactionsGroups.push(tGroup);
+
+                        //$('#transactionDetails').html($('#transactionDetails').html() + "<br />Pushed tGroup.year : " + tGroup.year + ", transactionsGroups.length : " + transactionsGroups.length);
+                    } else {
+                        //$('#transactionDetails').html($('#transactionDetails').html() + "<br /><br /><br />Processing TNumber : " + number + " , TID : " + stTransaction.id);
+
+                        // try finding the existing transactionsGroup for year
+                        var tGroup = findTransactionGroup(getYearFromTimeStamp(stTransaction.timeStamp), transactionsGroups);
+
+                        if (tGroup === null) {
+                            // if transactionsGroup does not exist for that year
+                            var tGroup = new transactionsGroup(getYearFromTimeStamp(stTransaction.timeStamp), stTransaction);
+                            //tGroup.year = getYearFromTimeStamp(stTransaction.timeStamp);
+                            //tGroup.transactions.push(stTransaction);
+                            //$('#transactionDetails').html($('#transactionDetails').html() + "<br />Pushing tGroup.year : " + tGroup.year + ", transactionsGroups.length : " + transactionsGroups.length);
+
+                            transactionsGroups.push(tGroup);
+
+                            //$('#transactionDetails').html($('#transactionDetails').html() + "<br />Pushed tGroup.year : " + tGroup.year + ", transactionsGroups.length : " + transactionsGroups.length);
+                        } else {
+                            // if transactionsGroup exists for that year
+                            // push the stTransaction into it
+                            //$('#transactionDetails').html($('#transactionDetails').html() + "<br />Pushing stTransaction into existing tGroup.year : " + tGroup.year + ", transactionsGroups.length : " + transactionsGroups.length);
+
+                            tGroup.transactions.push(stTransaction);
+
+                            //$('#transactionDetails').html($('#transactionDetails').html() + "<br />Pushed stTransaction into existing tGroup.year  : " + tGroup.year + ", transactionsGroups.length : " + transactionsGroups.length);
+                        }
+                    }
+                    //]]>
+                });
+            });
+
+
+
+
+            // manage dynamic data calls for getting transactionsDetails for each year
+            function getTransactionsDetails(year) {
+                //<![CDATA[
+
+                //$('#transactionDetails').html("hello.........." + year);
+
+                var transactionsGroup = findTransactionGroup(year, transactionsGroups);
+
+                if (transactionsGroup === null) {
+                    //$('#transactionDetails').html($('#transactionDetails').html() + "<br />Could not find transactionsGroup for " + year);
+
+                    return "";
+                }
+
+                var transactionsDetailsToReturn = '<Table style=\'border-collapse:collapse; padding: 5px; table-layout: fixed; word-wrap: break-word; text-align: justify; \'>';
+
+                transactionsDetailsToReturn += '<tr>' +
+                            '<th style=\'width: 5%; text-align: center; background-color: #fdff00; \' >' + 'ID' + '</th>' +
+                            '<th style=\'width: 10%; text-align: center; background-color: #fdff00; \'>' + 'Time Stamp' + '</th>' +
+                            '<th style=\'width: 10%; text-align: center; background-color: #fdff00; \'>' + 'Location' + '</th>' +
+                            '<th style=\'width: 65%; text-align: center; background-color: #fdff00; \'>' + 'Post' + '</th>' +
+                            '<th style=\'width: 10%; text-align: center; background-color: #fdff00; \'>' + 'Topic' + '</th>' +
+                            '</tr>';
+                            
+                $.each(transactionsGroup.transactions, function(number, stTransaction) {
+
+                    transactionsDetailsToReturn += 
+                            '<tr>' +
+                            '<td style=\'text-align: center; background-color: #fdff00;\' >' + stTransaction.id + '</td>' +
+                            '<td style=\'text-align: center; background-color: #feff9d; \'  >' + stTransaction.timeStamp + '</td>' +
+                            '<td style=\'text-align: center; background-color: #fdff00; \' >' + stTransaction.location + '</td>' +
+                            '<td style=\'word-wrap: break-word; text-align: justify; background-color: #feff9d; \'>' + stTransaction.post + '</td>' +
+                            '<td style=\'text-align: center; background-color: #fdff00; \'>' + stTransaction.topic + '</td>' +
+                            '</tr>';
+                });
+                transactionsDetailsToReturn += '</Table>';
+                //]]>
+
+                return transactionsDetailsToReturn;
+            }
+
+        </script>
+
+    </h:head>
+    <h:body>
+        <div id="container" style="height: 600px"></div>        
+        <div id="transactionDetails" style="min-height: 200px"></div>
+
+    </h:body>
+</html>
+

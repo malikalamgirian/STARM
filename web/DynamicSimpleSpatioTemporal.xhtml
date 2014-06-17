@@ -1,0 +1,256 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+    <h:head>
+        <title>Spatio-Temporal Association Rule Analysis</title>
+
+        <style>
+            .highcharts-tooltip>span {
+                background: rgba(225,225,225,0.85);
+                border: 1px solid silver;
+                border-radius: 3px;
+                box-shadow: 1px 1px 2px #888;
+                padding: 10px;
+            }
+
+            .highcharts-tooltip>table {
+                display:block; 
+                table-layout: fixed; 
+                width: 50%;
+                word-wrap: break-word;
+            }
+
+            .highcharts-tooltip>table, tr, th, td {
+                padding: 5px;  
+                border: 1px black solid;
+                border-collapse:collapse;
+                background: rgba(255,255,255,0.85);
+            }
+
+            #transactionDetails{                
+                font-family: wf_segoe-ui_normal, Segoe UI, Segoe, Segoe WP, Tahoma, Verdana, Arial, sans-serif;              
+
+            }
+        </style>
+
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+        <script src="http://code.highcharts.com/highcharts.js"></script>
+
+        <script>
+            var options = {
+                chart: {
+                    renderTo: 'container',
+                    type: 'scatter',
+                    zoomType: 'xy'
+                },
+                title: {
+                    text: 'Spatio-Temporal Analysis'
+                },
+                subtitle: {
+                    // load dynamically
+                    text: ''
+                },
+                xAxis: {
+                    type: 'linear',
+                    tickInterval: 1,
+                    title: {
+                        text: 'Year'
+                    }
+                },
+                yAxis: {
+                    floor: 0,
+                    title: {
+                        text: 'Transaction ID'
+                    }
+                },
+                tooltip: {
+                    backgroundColor: null,
+                    borderWidth: 1,
+                    shadow: true,
+                    useHTML: true,
+                    style: {
+                        padding: 0
+                    }
+                },
+                credits: {
+                    enabled: true,
+                    text: 'STARM'
+                },
+                plotOptions: {
+                    scatter: {
+                        marker: {
+                            radius: 5,
+                            states: {
+                                hover: {
+                                    enabled: true,
+                                    lineColor: 'rgb(100,100,100)'
+                                }
+                            }
+                        },
+                        states: {
+                            hover: {
+                                marker: {
+                                    enabled: true
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: null,
+                            borderWidth: 1,
+                            shadow: true,
+                            ////<![CDATA[
+                            headerFormat: '<span style=\'font-size:25px; \'><b>{point.y}</b></span><br>',
+                            pointFormat: '<span style=\'font-size:12px; \'><b>{point.x}</b></span><br>{series.name}',
+                            useHTML: true
+                                    //]]>
+                        }
+                    },
+                    series: {
+                        pointStart: 1995,
+                        pointInterval: 1,
+                        events: {
+                            click: function(event) {
+                                $('#transactionDetails').html(getTransaction(event.point.y, stTransactions));
+                            }
+                        }
+                    }
+                },
+                // load series data dynamically
+                series: []
+            };
+
+
+            function SpatioTemporalTransaction(id, timeStamp, location, post, topic) {
+                this.id = id;
+                this.timeStamp = timeStamp;
+                this.location = location;
+                this.post = post;
+                this.topic = topic;
+
+                /*$('#transactionDetails').html( $('#transactionDetails').html() + "<br/>" + id + "<br/>"
+                 + timeStamp + "<br/>" 
+                 + location + "<br/>"
+                 + post + "<br/>"
+                 + topic + "<br/>"
+                 ); */
+            }
+
+            // create empty dataset, and fill it dynamically
+            var stTransactions = [];
+
+            var temporalDataFileURL = 'https://dl.dropboxusercontent.com/s/huslqhb72vt3icg/temporalDataFile.txt?dl=1';
+
+            // read temporal data file
+            $.get(temporalDataFileURL, function(data) {
+                // split the lines
+                var lines = data.split("\n");
+
+                // set chart sub-title option from the first line of file
+                //$('#transactionDetails').html(lines[0]);
+
+                options.subtitle.text = 'Rule: ' + lines.shift();
+
+                $.each(lines, function(lineNo, line) {
+                    var items = line.split("\t");
+
+                    var stTransaction = new SpatioTemporalTransaction(parseInt(items[0]), items[1], items[2], items[3], items[4]);
+
+                    stTransactions.push(stTransaction);
+                });
+
+                //$('#transactionDetails').html( $('#transactionDetails').html() + "<br/>ST Transaction Length: " + stTransactions.length + "<br/>"); 
+
+                // load dynamic data and push into options
+                var series = {
+                    data: []
+                };
+
+                var groupName;
+
+                $.each(stTransactions, function(number, stTransaction) {
+                    //<![CDATA[
+                    if (number === 0) {
+                        // create a new group and push a value in it
+                        groupName = stTransaction.location;
+
+                        var tYear = parseInt(stTransaction.timeStamp.substring(stTransaction.timeStamp.length - 4, stTransaction.timeStamp.length));
+                        var tId = parseInt(stTransaction.id);
+                        var dataItem = [tYear, tId];
+
+                        series.name = groupName;
+                        series.data.push(dataItem);
+                    }
+                    else if (number !== 0 && groupName === stTransaction.location) {
+                        // push this into same group
+                        var tYear = parseInt(stTransaction.timeStamp.substring(stTransaction.timeStamp.length - 4, stTransaction.timeStamp.length));
+                        var tId = parseInt(stTransaction.id);
+                        var dataItem = [tYear, tId];
+
+                        series.data.push(dataItem);
+                    } else if (number !== 0 && groupName !== stTransaction.location) {
+                        // save the first series
+                        // create new group name and push a value into that new  truncated data group
+
+                        options.series.push(series);
+                        groupName = stTransaction.location;
+
+                        var tYear = parseInt(stTransaction.timeStamp.substring(stTransaction.timeStamp.length - 4, stTransaction.timeStamp.length));
+                        var tId = parseInt(stTransaction.id);
+                        var dataItem = [tYear, tId];
+
+                        series = {
+                            data: []
+                        };
+                        series.name = groupName;
+                        series.data.push(dataItem);
+                    }
+                    //]]>
+                });
+
+                // push the last series to options
+                options.series.push(series);
+
+                // create the chart
+                var chart = new Highcharts.Chart(options);
+            });
+
+
+            // manage dynamic data calls
+            function getTransaction(id, stTransactions) {
+                var transaction;
+
+                $.each(stTransactions, function(number, stTransaction) {
+                    if (stTransaction.id === id) {
+                        transaction = stTransaction;
+                    }
+                });
+                //<![CDATA[
+                var transactionDetail = '<Table style=\'border-collapse:collapse; padding: 5px; table-layout: fixed; word-wrap: break-word; text-align: justify; \'>' +
+                        '<tr>' +
+                        '<th style=\'width: 5%; text-align: center; background-color: #fdff00; \' >' + 'ID' + '</th>' +
+                        '<th style=\'width: 10%; text-align: center; background-color: #fdff00; \'>' + 'Time Stamp' + '</th>' +
+                        '<th style=\'width: 10%; text-align: center; background-color: #fdff00; \'>' + 'Location' + '</th>' +
+                        '<th style=\'width: 65%; text-align: center; background-color: #fdff00; \'>' + 'Post' + '</th>' +
+                        '<th style=\'width: 10%; text-align: center; background-color: #fdff00; \'>' + 'Topic' + '</th>' +
+                        '</tr>' +
+                        '<tr>' +
+                        '<td style=\'text-align: center; background-color: #fdff00;\' >' + id + '</td>' +
+                        '<td style=\'text-align: center; background-color: #feff9d; \'  >' + transaction.timeStamp + '</td>' +
+                        '<td style=\'text-align: center; background-color: #fdff00; \' >' + transaction.location + '</td>' +
+                        '<td style=\'word-wrap: break-word; text-align: justify; background-color: #feff9d; \'>' + transaction.post + '</td>' +
+                        '<td style=\'text-align: center; background-color: #fdff00; \'>' + transaction.topic + '</td>' +
+                        '</tr>' +
+                        '</Table>';
+                //]]>
+                return transactionDetail;
+            }
+
+        </script>
+
+    </h:head>
+    <body>
+        <div id="container" style="height: 500px"></div>        
+        <div id="transactionDetails" style="min-height: 200px"></div>
+    </body>
+</html>

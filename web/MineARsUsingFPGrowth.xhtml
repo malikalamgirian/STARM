@@ -1,0 +1,328 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+    <h:head>
+        <title>Spatio-Temporal Association Rule Mining of Unstructured Text</title>
+
+        <link rel="stylesheet" type="text/css" href="bootstrap.css" />
+
+        <style type="text/css">
+
+            #titleDiv{
+                font-size: 25px;
+                font-family: wf_segoe-ui_normal, Segoe UI, Segoe, Segoe WP, Tahoma, Verdana, Arial, sans-serif; 
+                font-weight: bold;
+                float: top;
+                text-align: center;
+                padding: 10px;
+                background-color: #fdff00;
+                cursor: default;
+
+            }
+
+            #tableTitleTD{
+                font-size: 25px;
+                font-family: wf_segoe-ui_normal, Segoe UI, Segoe, Segoe WP, Tahoma, Verdana, Arial, sans-serif; 
+                font-weight: bold;
+                float: top;
+                text-align: center;
+                padding: 10px;
+                background-color: #fdff00;
+                cursor: default;
+            }
+
+            #formDiv{
+                font-size: 16px;
+                font-family: wf_segoe-ui_normal, Segoe UI, Segoe, Segoe WP, Tahoma, Verdana, Arial, sans-serif; 
+                padding-top: 30px;
+                padding-bottom: 30px;
+                padding-left: 10px;
+                padding-right: 10px;
+                background-color: #eeeeee;
+                min-height: 500px;
+            }
+
+
+
+            table, tr, td {
+                //border: 1px #1E2935 solid;
+                border-collapse: collapse;
+                margin: auto;
+                background-color: #e9e9e9; 
+            }
+
+            table{
+                padding: 15px;
+
+            }
+
+            .tCell{
+                padding: 10px;
+
+            }
+
+            #messagesTD{
+                font-weight: bold;
+                padding: 10px;
+            }
+
+            .fatalErrorMessage{
+                color: red;
+                list-style-type: none;
+            }
+
+            .errorMessage{
+                color: red;
+                list-style-type: none;
+            }
+
+            .infoMessage{
+                color: green;
+                list-style-type: none;
+            } 
+
+            .warningMessage{
+                color: #cc00cc;
+                list-style-type: none;
+            }
+
+            input[type=text] {
+                border: 5px solid white; 
+                -webkit-box-shadow: 
+                    inset 0 0 8px  rgba(0,0,0,0.1),
+                    0 0 16px rgba(0,0,0,0.1); 
+                -moz-box-shadow: 
+                    inset 0 0 8px  rgba(0,0,0,0.1),
+                    0 0 16px rgba(0,0,0,0.1); 
+                box-shadow: 
+                    inset 0 0 8px  rgba(0,0,0,0.1),
+                    0 0 16px rgba(0,0,0,0.1); 
+                padding: 5px;
+                background: rgba(255,255,255,0.5);
+
+                font-size: 25px;
+                font-family: wf_segoe-ui_normal, Segoe UI, Segoe, Segoe WP, Tahoma, Verdana, Arial, sans-serif; 
+                width: 50%;
+            }
+
+            input[type=file] {
+                border: 5px solid white; 
+                -webkit-box-shadow: 
+                    inset 0 0 8px  rgba(0,0,0,0.1),
+                    0 0 16px rgba(0,0,0,0.1); 
+                -moz-box-shadow: 
+                    inset 0 0 8px  rgba(0,0,0,0.1),
+                    0 0 16px rgba(0,0,0,0.1); 
+                box-shadow: 
+                    inset 0 0 8px  rgba(0,0,0,0.1),
+                    0 0 16px rgba(0,0,0,0.1); 
+                padding: 5px;
+                background: rgba(255,255,255,0.5);
+
+                font-size: 16px;
+                font-family: wf_segoe-ui_normal, Segoe UI, Segoe, Segoe WP, Tahoma, Verdana, Arial, sans-serif; 
+
+            }
+
+            #pageContent{
+                margin-top: 5%;
+            }
+
+            .descriptiveHelp{
+                font-size: 25px;
+                font-style: italic;
+                color: green;
+                cursor: default;               
+            }
+
+            #messagesDiv{
+                display: none;
+                font-size: 15px;
+                color: black;
+                text-wrap: normal;
+                text-align: justify;
+                z-index: 100;
+                position: absolute;
+                width: 50%;
+                background-color: #eeeeee;
+                font-weight: normal;  
+                padding: 5px;
+                border-radius: 5px;
+                border: 1px black solid;
+            }
+
+
+        </style>
+
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+
+        <script>
+            function showSupportHelpDescription() {
+                document.getElementById('messagesDiv').innerHTML = "<bold>Minimum Support:</bold> Minimum support threshold value should be greater than 0.0 and less than or equal to 1.0";
+                document.getElementById('messagesDiv').style.display = "block";
+            }
+            ;
+
+            function hideSupportHelpDescription() {
+                document.getElementById('messagesDiv').style.display = "none";
+            }
+            ;
+
+            function showConfidenceHelpDescription() {
+                document.getElementById('messagesDiv').innerHTML = "<bold>Minimum Confidence:</bold> Minimum confidence threshold value should be greater than 0.0 and less than or equal to 1.0";
+                document.getElementById('messagesDiv').style.display = "block";
+            }
+            ;
+
+            function hideConfidenceHelpDescription() {
+                document.getElementById('messagesDiv').style.display = "none";
+            }
+            ;
+
+            function showIDFHelpDescription() {
+                document.getElementById('messagesDiv').innerHTML = "<bold>Minimum IDF Score Value:</bold> Minimum IDF threshold value depends on the number of documents in the dataset. The IDF score value for a term t can be calculated by log(N/ndt), where N is the total number of documents in the collection, and ndt is the number of documents in which the terms t appears, log is the base 10 logarithm of the resulting value. The minimum IDF score value ensures that the only the terms with IDF score value greater than on equal to the minimum IDF score value shall be included in the term by document matrix. <br/><br/>A minimum IDF score value of 1.0 means that the terms occurring in at most 10 percent of the transactions shall be considered for further analysis.";
+                document.getElementById('messagesDiv').style.display = "block";
+            }
+            ;
+
+            function hideIDFHelpDescription() {
+                document.getElementById('messagesDiv').style.display = "none";
+            }
+            ;
+
+
+        </script>
+
+    </h:head>
+    <h:body>
+        <div class="navbar-fixed-top navbar navbar-default">
+            <div class="navbar-header">
+                <a class="navbar-brand">Spatio-Temporal Association Rule Mining of Unstructured Text</a>
+            </div>
+        </div>
+
+
+        <div class="container" id="pageContent">
+
+            <div id="formDiv">
+
+                <h:form enctype="multipart/form-data"> 
+
+                    <table id="formTable">
+                        <tr class="tRow">
+                            <td colspan="2" id="tableTitleTD" align="center">
+                                Mine Association Rules Using FP-Growth                              
+                            </td>
+                        </tr>
+
+                        <tr class="tRow">
+                            <td colspan="2" id="messagesTD" align="center">
+                                <div id="messagesDiv">
+
+
+                                </div>
+                                <h:messages id="messages" 
+                                            fatalClass="fatalErrorMessage" 
+                                            infoClass="infoMessage"
+                                            errorClass="errorMessage"
+                                            warnClass="warningMessage" ></h:messages>
+                            </td>
+
+                        </tr>
+                        <tr class="tRow">
+                            <td  class="tCell">Select Input File</td>
+                            <td class="tCell"><h:inputFile id="file" 
+                                                           required="true" 
+                                                           requiredMessage="Kindly select input file."
+                                                           value="#{aRMBean.file}"></h:inputFile> 
+
+
+                            </td>
+
+                        </tr>
+                        <tr class="tRow">
+                            <td class="tCell">Enter Minimum Support Threshold Value
+
+                                <span class="descriptiveHelp" 
+                                      id="minimumSupportDescription"
+                                      onmouseover="showSupportHelpDescription()"
+                                      onmouseout="hideSupportHelpDescription()"> ?</span>
+
+                            </td>
+                            <td class="tCell"><h:inputText id="support"
+                                                           required="true" 
+                                                           value="#{aRMBean.minimumSupport}"
+                                                           ></h:inputText>
+
+
+                            </td>
+
+                        </tr>
+                        <tr class="tRow">
+                            <td  class="tCell">Enter Minimum Confidence Threshold Value
+                                <span class="descriptiveHelp"  
+                                      id="minimumConfidenceDesc"
+                                      onmouseover="showConfidenceHelpDescription()"
+                                      onmouseout="hideConfidenceHelpDescription()"> ?</span>
+                            </td>
+                            <td  class="tCell"><h:inputText id="confidence" 
+                                                            required="true" 
+                                                            value="#{aRMBean.minimumConfidence}"
+                                                            ></h:inputText>
+
+                            </td>
+
+                        </tr>
+                        <tr class="tRow">
+                            <td  class="tCell">Enter Minimum IDF score value
+                                <span class="descriptiveHelp" 
+                                      id="minimumIDFDesc"
+                                      onmouseover="showIDFHelpDescription()"
+                                      onmouseout="hideIDFHelpDescription()"> ?</span>
+                            </td>
+                            <td  class="tCell"><h:inputText id="idf" 
+                                                            required="true" 
+                                                            value="#{aRMBean.minimumIDFScore}"
+                                                            ></h:inputText>
+
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2"  class="tCell" align="center">
+                                <h:commandButton value="Preprocess Dataset" 
+                                                 title="Preprocess dataset" 
+                                                 action="#{aRMBean.preprocessDataset()}" 
+                                                 styleClass="btn btn-primary btn-xs">
+                                </h:commandButton> >> 
+
+                                <h:commandButton value="Convert to Term-by-Document Matrix" 
+                                                 title="Convert preprocessed dataset to term-by-document matrix" 
+                                                 action="#{aRMBean.createTDM()}" 
+                                                 styleClass="btn btn-primary btn-xs">
+                                </h:commandButton> >>
+
+                                <h:commandButton value="Extract Association Rules" 
+                                                 title="Extract association rules from term-by-document-matrix" 
+                                                 action="#{aRMBean.extractARs()}" 
+                                                 styleClass="btn btn-primary btn-xs">
+                                </h:commandButton> >>
+
+                                <h:link value="Analyse Results" 
+                                        title="Analyse association rule mining results" 
+                                        outcome="#{aRMBean.analyseAssociationRules()}" 
+                                        styleClass="btn btn-primary btn-xs"
+                                        id="analyseResultsLink">
+                                </h:link>
+                            </td>
+                        </tr>
+                        <tr class="tRow">
+                            <td colspan="2"  class="tCell" align="center"><h:commandButton title="Perform association rule mining in a single click" value="One Click Mining" action="#{aRMBean.mine()}" styleClass="btn btn-primary btn-sm"></h:commandButton></td>
+
+                        </tr>
+                    </table>
+                </h:form>
+            </div>
+        </div>
+    </h:body>
+</html>

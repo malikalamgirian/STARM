@@ -1,0 +1,139 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+    <h:head>
+        <title>Spatial Analysis</title>
+        <style>
+            #map-canvas {
+                height: 80%;
+                margin: 0px;
+                padding: 3px
+            }
+            html, body {
+                height: 100%;
+                margin: 0px;
+                padding: 0px
+            }
+            
+            #status-div{
+                font-family: wf_segoe-ui_normal, Segoe UI, Segoe, Segoe WP, Tahoma, Verdana, Arial, sans-serif;
+            }
+            
+            #ruleDiv{
+                text-align: center;
+                font-size: 12px;
+                font-family: wf_segoe-ui_normal, Segoe UI, Segoe, Segoe WP, Tahoma, Verdana, Arial, sans-serif;               
+                cursor: default;
+                float: top;
+                padding: 3px;
+                background-color: #fdff00;
+                border-bottom: 1px solid black;
+                text-wrap: normal;
+            }
+                        
+            #locationNameDiv{
+                text-align: center;
+                font-size: 25px;
+                font-family: wf_segoe-ui_normal, Segoe UI, Segoe, Segoe WP, Tahoma, Verdana, Arial, sans-serif;               
+                cursor: default;
+                float: top;                
+            }
+        </style>
+
+        <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
+         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+
+        <script>
+            ////<![CDATA[
+            var spatialDataFileURL = 'https://dl.dropboxusercontent.com/s/vvqcl3rs5dott54/spatialDataFile.kml?dl=1';
+            var simpleYealyFrequenciesDataFileURL = 'https://dl.dropboxusercontent.com/s/mjcz7gszk96nzvb/simpleYealyFrequenciesDataFile.txt?dl=1';
+            
+            // add rule to ruleDiv
+            // read frequencies data file
+            $.get(simpleYealyFrequenciesDataFileURL, function(data) {               
+                // split the lines
+                var lines = data.split("\n");                
+                
+                // set chart sub-title option from the first line of file
+                $('#ruleDiv').html(lines[0]);                    
+            });
+
+            function initialize() {
+
+                var mapOptions = {
+                    zoom: 2
+                };
+
+                var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+
+                var kmLayer = new google.maps.KmlLayer({
+                    url: spatialDataFileURL,
+                    suppressInfoWindows: true
+                });
+                kmLayer.setMap(map);
+
+                // check if kml loaded properly
+                google.maps.event.addListener(kmLayer, 'status_changed', function() {
+                    //document.getElementById('status-div').innerHTML += 'KML ... ';
+
+                    if (kmLayer.getStatus() === google.maps.KmlLayerStatus.OK) {
+                        //document.getElementById('status-div').innerHTML += 'KML Success.';
+
+                        if (map.Data === null) {
+                            document.getElementById('status-div').innerHTML += ' Map Data is null.';
+                        }
+                        else {
+                            //document.getElementById('status-div').innerHTML += ' Map Data is not null.';
+                        }
+                        ;
+                    }
+                    else if (kmLayer.getStatus() === google.maps.KmlLayerStatus.DOCUMENT_NOT_FOUND) {
+                        document.getElementById('status-div').innerHTML += 'KML DOCUMENT_NOT_FOUND';
+                    }
+                    else if (kmLayer.getStatus() === google.maps.KmlLayerStatus.UNKNOWN) {
+                        document.getElementById('status-div').innerHTML += 'KML UNKNOWN';
+                    }
+                    else if (kmLayer.getStatus() === google.maps.KmlLayerStatus.FETCH_ERROR) {
+                        document.getElementById('status-div').innerHTML += 'KML FETCH_ERROR';
+                    }
+                    else if (kmLayer.getStatus() === google.maps.KmlLayerStatus.INVALID_DOCUMENT) {
+                        document.getElementById('status-div').innerHTML += 'KML INVALID_DOCUMENT';
+                    }
+                    else if (kmLayer.getStatus() === google.maps.KmlLayerStatus.INVALID_REQUEST) {
+                        document.getElementById('status-div').innerHTML += 'KML INVALID_REQUEST';
+                    }
+                    else if (kmLayer.getStatus() === google.maps.KmlLayerStatus.LIMITS_EXCEEDED) {
+                        document.getElementById('status-div').innerHTML += 'KML LIMITS_EXCEEDED';
+                    }
+                    else if (kmLayer.getStatus() === google.maps.KmlLayerStatus.TIMED_OUT) {
+                        document.getElementById('status-div').innerHTML += 'KML TIMED_OUT';
+                    }
+                    else {
+                        document.getElementById('status-div').innerHTML += 'KML Error. Recheck code.';
+                    }
+
+                });
+
+                // manage the feature click and show the detail
+                google.maps.event.addListener(kmLayer, 'click', function(event) {
+                    //var content = event.featureData.infoWindowHtml;
+                    var name = event.featureData.name;
+                    var description = event.featureData.description;
+
+                    document.getElementById('status-div').innerHTML = '<div id="locationNameDiv">' + name + '</div>' + description;
+                });
+
+            }
+
+            google.maps.event.addDomListener(window, 'load', initialize);
+
+            //]]>
+        </script>
+    </h:head>
+    <h:body>
+        <div id="ruleDiv"></div>
+        <div id="map-canvas"></div>
+        <div id="status-div"></div>
+    </h:body>
+</html>

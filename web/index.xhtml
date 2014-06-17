@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+    <h:head>
+        <title>Spatio-Temporal Association Rule Mining and Analysis of Unstructured Text</title>
+
+        <link rel="stylesheet" type="text/css" href="bootstrap.css" />
+
+        <style type="text/css">
+            #navDiv{
+                margin-left: 3%;
+                margin-right: 3%;
+            }      
+            
+            #pageContent{
+                margin-top: 5%;
+            }
+            
+            #navItemsContainerDiv{
+                font-size: 16px;
+                font-family: wf_segoe-ui_normal, Segoe UI, Segoe, Segoe WP, Tahoma, Verdana, Arial, sans-serif; 
+                padding-top: 30px;
+                padding-bottom: 30px;
+                padding-left: 10px;
+                padding-right: 10px;
+                background-color: #eeeeee;
+                min-height: 500px;
+            }
+            
+        </style>
+    </h:head>
+    <h:body>
+        <div class="navbar-fixed-top navbar navbar-default">
+            <div class="navbar-header">
+                <a class="navbar-brand">Spatio-Temporal Association Rule Mining of Unstructured Text</a>
+            </div>
+        </div>
+        
+        <div class="container" id="pageContent">
+
+            <div class="row" id="navItemsContainerDiv">
+
+                <div id="navDiv">
+                    <ol class="nav nav-pills nav-stacked list-group" style="color: #18bc9c">
+                        <li class="list-group-item"><h:link outcome="MineARsUsingFPGrowth">Mine Association Rules Using FP-Growth</h:link></li>
+                        <li class="list-group-item"><h:link outcome="UploadAndAnalyseAssociationRules">Analyze Association Rules</h:link></li>                        
+                    </ol>
+                </div>
+            </div>     
+        </div>
+    </h:body>
+</html>
+
