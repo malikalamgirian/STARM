@@ -1,0 +1,159 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+    <h:head>
+        <title>Spatio-Temporal Analysis</title>
+        <style>
+            #map3d {
+                height: 90%;
+                margin: 0px;
+                padding: 0px
+            }
+            html, body {
+                height: 100%;
+                margin: 0px;
+                padding: 0px
+            }
+
+            #status-div{
+                font-family: wf_segoe-ui_normal, Segoe UI, Segoe, Segoe WP, Tahoma, Verdana, Arial, sans-serif;
+            }
+
+            #locationNameDiv{
+                text-align: center;
+                font-size: 25px;
+                font-family: wf_segoe-ui_normal, Segoe UI, Segoe, Segoe WP, Tahoma, Verdana, Arial, sans-serif;               
+                cursor: default;
+                float: top;                
+            }
+            
+            #ruleDiv{
+                text-align: center;
+                font-size: 12px;
+                font-family: wf_segoe-ui_normal, Segoe UI, Segoe, Segoe WP, Tahoma, Verdana, Arial, sans-serif;               
+                cursor: default;
+                float: top;
+                padding: 3px;
+                background-color: #fdff00;
+                border-bottom: 1px solid black;
+                text-wrap: normal;
+            }
+        </style>
+        
+        <script type="text/javascript" src="https://www.google.com/jsapi"></script>        
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+         
+        <script type="text/javascript">
+            ////<![CDATA[
+            var simpleYealyFrequenciesDataFileURL = 'https://dl.dropboxusercontent.com/s/mjcz7gszk96nzvb/simpleYealyFrequenciesDataFile.txt?dl=1';
+            
+            // add rule to ruleDiv
+            // read frequencies data file
+            $.get(simpleYealyFrequenciesDataFileURL, function(data) {               
+                // split the lines
+                var lines = data.split("\n");                
+                
+                // set chart sub-title option from the first line of file
+                $('#ruleDiv').html(lines[0]);                    
+            });
+    
+            var ge;
+            google.load("earth", "1", {"other_params": "sensor=false"});
+
+            function init() {
+                google.earth.createInstance('map3d', initCB, failureCB);
+            }
+
+            function initCB(instance) {
+                ge = instance;
+                ge.getWindow().setVisibility(true);
+                ge.getNavigationControl().setVisibility(ge.VISIBILITY_SHOW);
+                ge.getOptions().setOverviewMapVisibility(true);
+                ge.getOptions().setScaleLegendVisibility(true);
+                ge.getOptions().setStatusBarVisibility(true);
+                ge.getOptions().setTerrainExaggeration(1.0);
+
+                ge.getLayerRoot().enableLayerById(ge.LAYER_BORDERS, true);
+
+                // make time control visible
+                if (ge.getTime().getControl().getVisibility() === ge.VISIBILITY_HIDE) {
+                    ge.getTime().getControl().setVisibility(ge.VISIBILITY_SHOW);
+                }
+
+                var spatioTemporalDataFileURL = 'https://dl.dropboxusercontent.com/s/qkjwin26rhr43b3/spatioTemporalDataFile.kml?dl=1';
+
+                google.earth.fetchKml(ge, spatioTemporalDataFileURL, function(kmlObject) {
+                    if (kmlObject) {
+                        //document.getElementById('status-div').innerHTML = 'Success Loading KML.';
+
+                        // add features
+                        ge.getFeatures().appendChild(kmlObject);
+                    }
+
+                    if (kmlObject.getAbstractView() !== null) {
+                        ge.getView().setAbstractView(kmlObject.getAbstractView());
+                    }
+                    else {
+                        var la = ge.createLookAt('');
+                        la.set(40.58, -103.46, 5000000, ge.ALTITUDE_RELATIVE_TO_GROUND, 0, 0, 1000);
+
+                        ge.getView().setAbstractView(la);
+                    }
+                });
+
+                google.earth.addEventListener(ge.getWindow(), 'click', function(event) {
+                    // check if placemark was clicked
+                    if (event.getTarget().getType() === 'KmlPlacemark') {
+
+                        // prevent baloons from popping out
+                        event.preventDefault();
+
+                        // get and show the info 
+                        var placemark = event.getTarget();
+                        var name = placemark.getName();
+                        var description = placemark.getDescription();
+
+                        document.getElementById('status-div').innerHTML = '<div id="locationNameDiv">' + name + '</div>' + description;
+                    }
+                    ;
+                });
+                
+                /*
+                google.earth.addEventListener(ge.getWindow(), 'mouseover', function(event) {
+                    // check if placemark was clicked
+                    if (event.getTarget().getType() === 'KmlPlacemark') {
+
+                        // prevent baloons from popping out
+                        event.preventDefault();
+
+                        // get and show the info 
+                        var placemark = event.getTarget();
+                        var name = placemark.getName();
+                        var description = placemark.getDescription();
+
+                        document.getElementById('status-div').innerHTML = '<div id="locationNameDiv">' + name + '</div>';
+                    }
+                    ;
+                });*/
+        
+
+            }
+
+            function failureCB(errorCode) {
+                document.getElementById('map3d').innerHTML = 'Error Loading Map... Error code: ' + errorCode;
+            }
+
+            google.setOnLoadCallback(init);
+
+            //]]>
+        </script>
+
+    </h:head>
+    <h:body>        
+        <div id="ruleDiv"></div>
+        <div id="map3d"></div>
+        <div id="status-div"></div>
+    </h:body>
+</html>
+

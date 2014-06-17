@@ -1,0 +1,75 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<faces-config version="2.2"
+              xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_2_2.xsd">
+    <navigation-rule>
+        <from-view-id>/index.xhtml</from-view-id>
+        <navigation-case>
+            <from-outcome>MineARsUsingFPGrowth</from-outcome>
+            <to-view-id>/MineARsUsingFPGrowth.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+    <navigation-rule>
+        <from-view-id>/index.xhtml</from-view-id>
+        <navigation-case>
+            <from-outcome>UploadAndAnalyseAssociationRules</from-outcome>
+            <to-view-id>/UploadAndAnalyseAssociationRules.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+    <managed-bean>
+        <description>Backing Bean for mining association rules using fp growth. We will later on use this for further temporal, spatial, and spatio-temporal analysis.</description>
+        <managed-bean-name>aRMBean</managed-bean-name>
+        <managed-bean-class>com.starm.beans.ARMBean</managed-bean-class>
+        <managed-bean-scope>session</managed-bean-scope>
+    </managed-bean>
+    <navigation-rule>
+        <from-view-id>/MineARsUsingFPGrowth.xhtml</from-view-id>
+        <navigation-case>
+            <from-outcome>SUCCESS</from-outcome>
+            <to-view-id>/MiningResultsAndAnalysis.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+    <navigation-rule>
+        <from-view-id>/MineARsUsingFPGrowth.xhtml</from-view-id>
+        <navigation-case>
+            <from-outcome>FAILURE</from-outcome>
+            <to-view-id>/MineARsUsingFPGrowth.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+    <managed-bean>
+        <description>For handling all configurations</description>
+        <managed-bean-name>globalConfigurationsBean</managed-bean-name>
+        <managed-bean-class>com.starm.beans.GlobalConfigurationsBean</managed-bean-class>
+        <managed-bean-scope>session</managed-bean-scope>
+    </managed-bean>
+    <managed-bean>
+        <description>To handle and save global data for convenience</description>
+        <managed-bean-name>globalDataBean</managed-bean-name>
+        <managed-bean-class>com.starm.beans.GlobalDataBean</managed-bean-class>
+        <managed-bean-scope>session</managed-bean-scope>
+    </managed-bean>
+    <managed-bean>
+        <description>To handle uploading and spatio temporal analysis of existing association rules</description>
+        <managed-bean-name>uploaderAndARsAnalyzerBean</managed-bean-name>
+        <managed-bean-class>com.starm.beans.UploaderAndARsAnalyzerBean</managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+    <navigation-rule>
+        <from-view-id>/UploadAndAnalyseAssociationRules.xhtml</from-view-id>
+        <navigation-case>
+            <from-outcome>SUCCESS</from-outcome>
+            <to-view-id>/MiningResultsAndAnalysis.xhtml</to-view-id>
+        </navigation-case>
+        <navigation-case>
+            <from-outcome>FAILURE</from-outcome>
+            <to-view-id>/UploadAndAnalyseAssociationRules.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+    <managed-bean>
+        <description>Helps in downloading files </description>
+        <managed-bean-name>fileDownloaderBean</managed-bean-name>
+        <managed-bean-class>com.starm.beans.FileDownloaderBean</managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+</faces-config>

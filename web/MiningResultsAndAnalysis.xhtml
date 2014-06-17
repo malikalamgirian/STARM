@@ -1,0 +1,171 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <h:head>
+        <title>Mining Results and Analysis</title>
+        <style>
+            body{
+                overflow: hidden;
+            }
+
+            #rulesDiv {
+                float: left;
+                font-size: 12px;
+                font-family: wf_segoe-ui_normal, Segoe UI, Segoe, Segoe WP, Tahoma, Verdana, Arial, sans-serif; 
+                overflow: scroll;
+                min-width: 10%;
+                min-height: 600px;
+                height: 750px;
+                padding: 3px;
+                max-width: 39%;
+            }
+
+            .ruleLink{
+                color: black;
+                text-decoration: none;
+                cursor: default;
+            }
+
+            .ruleLink:hover{
+                color: #0000ff;
+            }
+
+            .ruleDiv{
+                padding-bottom: 4px;
+                padding-top: 4px;                
+                border-top: 1px solid black;
+            }
+
+            #menuBar{
+                float: right;
+                font-size: 10px;
+                font-family: wf_segoe-ui_normal, Segoe UI, Segoe, Segoe WP, Tahoma, Verdana, Arial, sans-serif;               
+                padding: 2px;
+                background-color: #eeeeee;
+                cursor: default;
+            }
+
+            .menuItem{
+                border-left: 1px black solid;
+                border-right: 1px black solid;
+                padding-right: 5px;
+                padding-left: 5px;
+            }
+            
+            .menuItemLink {
+                text-decoration: none;
+                color: #000000;
+                cursor: default;
+            }
+
+            .menuItem:hover{
+                background-color: #fdff00;
+            }
+        </style>
+
+        <script type="text/javascript">
+            var simpleSpatioTemporalPageURL = "DynamicSimpleSpatioTemporal.xhtml";
+            var spatialPageURL = "DynamicSpatial.xhtml";
+            var spatioTemporalPageURL = "DynamicSpatioTemporal.xhtml";
+            var temporalPageURL = "DynamicTemporal.xhtml";
+            var associationRuleMiningPageURL = "MineARsUsingFPGrowth.xhtml";
+            var homePageURL = "/STARM";
+
+            function refresh() {
+                document.getElementById('analysisFrame').contentWindow.location.reload(true);
+            }
+            ;
+
+            function analyseSimpleSpatioTemporal() {
+                document.getElementById('analysisFrame').contentWindow.location.replace(simpleSpatioTemporalPageURL);
+            }
+            ;
+
+            function analyseSpatial() {
+                document.getElementById('analysisFrame').contentWindow.location.replace(spatialPageURL);
+            }            ;
+
+            function analyseSpatioTemporal() {
+                document.getElementById('analysisFrame').contentWindow.location.replace(spatioTemporalPageURL);
+            }            ;
+            
+            function analyseTemporal(){
+                document.getElementById('analysisFrame').contentWindow.location.replace(temporalPageURL);
+            };
+            
+            function mineAssociationRules(){
+                location.replace(associationRuleMiningPageURL);
+            }
+            
+            function  gotoHomePage(){
+              location.replace(homePageURL);  
+            };
+            
+            
+
+        </script>
+    </h:head>
+    <h:body>
+
+        <h:form>
+
+            <div id="rulesDiv">
+
+                <ui:repeat value="#{globalDataBean.rules}" var="rule">
+
+                    <h:commandLink action="#{globalDataBean.updateDataFiles(rule)}" styleClass="ruleLink">
+                        <f:ajax render="@this"/>
+                        <div class="ruleDiv">#{rule}</div> 
+                    </h:commandLink>
+
+                </ui:repeat>   
+
+            </div>
+
+        </h:form>
+
+        <h:form>
+
+            <div id="menuBar">
+
+                <span class="menuItem" onclick="refresh()">Refresh</span>
+                <span class="menuItem" onclick="analyseSpatial()">Spatial</span>
+                <span class="menuItem" onclick="analyseTemporal()">Temporal</span>
+                <span class="menuItem" onclick="analyseSimpleSpatioTemporal()">Simple Spatio-Temporal</span>
+                <span class="menuItem" onclick="analyseSpatioTemporal()">Spatio-Temporal</span>                
+                <span class="menuItem">
+                    <h:commandLink  value="Spatial in GE" 
+                                    action="#{globalDataBean.openSpatialDatasetInGE()}"
+                                    styleClass="menuItemLink">
+                    </h:commandLink>
+                </span>
+                <span class="menuItem" >
+                    <h:commandLink value="Spatio-Temporal in GE" 
+                                   action="#{globalDataBean.openSpatioTemporalDatasetInGE()}"
+                                   styleClass="menuItemLink">
+                    </h:commandLink>
+                </span>
+                <span class="menuItem" onclick="mineAssociationRules()">Mine Association Rules</span>
+                <span class="menuItem" onclick="gotoHomePage()">Home</span>
+                
+
+            </div>
+
+        </h:form>
+
+        <iframe id="analysisFrame" 
+                width="60%" 
+                height="750px"
+                scrolling="yes" 
+                frameborder="1"
+                align="right"
+                src="DynamicSimpleSpatioTemporal.xhtml">            
+
+        </iframe>
+
+
+    </h:body>
+</html>
